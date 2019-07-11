@@ -1,11 +1,6 @@
 import tensorflow as tf
 import tensorflow_hub as hub
-import matplotlib.pyplot as plt
 import numpy as np
-import os
-import pandas as pd
-import re
-import seaborn as sns
 
 module_url = "https://tfhub.dev/google/universal-sentence-encoder/2" #@param ["https://tfhub.dev/google/universal-sentence-encoder/2", "https://tfhub.dev/google/universal-sentence-encoder-large/3"]
 
@@ -29,9 +24,9 @@ with tf.Session() as session:
 	message_embeddings = session.run(embed(messages))
 
 	for i, message_embedding in enumerate(np.array(message_embeddings).tolist()):
-	print("Message: {}".format(messages[i]))
-	print("Embedding size: {}".format(len(message_embedding)))
-	message_embedding_snippet = ", ".join(
-		(str(x) for x in message_embedding[:3])
-	)
-	print("Embedding: [{}, ...]\n".format(message_embedding_snippet))
+		print("Message: {}".format(messages[i]))
+		print("Embedding size: {}".format(len(message_embedding)))
+		message_embedding_snippet = ", ".join(
+			(str(x) for x in message_embedding[:3])
+		)
+		print("Embedding: [{}, ...]\n".format(message_embedding_snippet))
