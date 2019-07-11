@@ -34,7 +34,7 @@ def encode():
 
 	with tf.Session() as session:
 		session.run([tf.global_variables_initializer(), tf.tables_initializer()])
-		message_embeddings = session.run(embed(messages))
+		message_embeddings = session.run(embed(texts))
 
 		embeddings = np.array(message_embeddings).tolist()
 
