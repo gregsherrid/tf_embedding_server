@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, request
 from flask_cors import CORS
 
 import tensorflow as tf
@@ -23,7 +23,14 @@ def home():
 def encode():
 	params = get_request_params()
 
-	params["texts"]
+	texts = params.get("texts", [])
+	if not len(texts):
+		text = params.get("text")
+		if text:
+			texts.append(text)
+
+	if not len(texts):
+		return json.dumps({ "error": "Please provide 'text' or 'texts' argument." })
 
 	with tf.Session() as session:
 		session.run([tf.global_variables_initializer(), tf.tables_initializer()])
