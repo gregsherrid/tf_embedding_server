@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from flask_cors import CORS
 
 import tensorflow as tf
@@ -7,10 +7,19 @@ import numpy as np
 
 import json
 
-use_module_url = "https://tfhub.dev/google/universal-sentence-encoder/2" #@param ["https://tfhub.dev/google/universal-sentence-encoder/2", "https://tfhub.dev/google/universal-sentence-encoder-large/3"]
-embed = hub.Module(use_module_url)
-
 tf.logging.set_verbosity(tf.logging.ERROR)
+use_module_url = "https://tfhub.dev/google/universal-sentence-encoder/2" #@param ["https://tfhub.dev/google/universal-sentence-encoder/2", "https://tfhub.dev/google/universal-sentence-encoder-large/3"]
+
+g = tf.Graph()
+with g.as_default():
+	text_input = tf.placeholder(dtype=tf.string, shape=[None])
+	embed = hub.Module(use_module_url)
+	embedded_text = embed(text_input)
+	init_op = tf.group([tf.global_variables_initializer(), tf.tables_initializer()])
+g.finalize()
+
+session = tf.Session(graph=g)
+session.run(init_op)
 
 app = Flask(__name__)
 CORS(app)
@@ -23,22 +32,12 @@ def home():
 def encode():
 	params = get_request_params()
 
-	texts = params.get("texts", [])
-	if not len(texts):
-		text = params.get("text")
-		if text:
-			texts.append(text)
+	text = params.get("text")
+	if not text:
+		return jsonify({ "error": "Please provide 'text' argument." })
 
-	if not len(texts):
-		return json.dumps({ "error": "Please provide 'text' or 'texts' argument." })
-
-	with tf.Session() as session:
-		session.run([tf.global_variables_initializer(), tf.tables_initializer()])
-		message_embeddings = session.run(embed(texts))
-
-		embeddings = np.array(message_embeddings).tolist()
-
-	return json.dumps({ "results": embeddings })
+	result = session.run(text, feed_dict={ text_input: ["Hello world"] })
+	return jsonify({ "result": result })
 
 # Merges request.args and request.form
 def get_request_params():
